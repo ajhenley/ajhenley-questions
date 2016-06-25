@@ -1,0 +1,71 @@
+<%= form_for(@template) do |f| %>
+  <% if @template.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@template.errors.count, "error") %> prohibited this template from being saved:</h2>
+
+      <ul>
+      <% @template.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :is_active %><br>
+    <%= f.check_box :is_active %>
+  </div>
+  <% if @template.persisted? %>
+    <% f.object.questions.each  do |q| %>
+      <div class="field">
+        <%= text_field_tag :question_no, nil, value: "#{q[1]["question_no"]}", name: "template[questions][#{q[0]}][question_no]" %>
+        <%= text_field_tag :question, nil, value: "#{q[1]["question_name"]}", name: "template[questions][#{q[0]}][question_name]" %>
+        <%= text_field_tag :question_type, nil, value: "#{q[1]["question_type"]}", name: "template[questions][#{q[0]}][question_type]" %>
+      </div>
+    <% end %>
+  <% else %>
+    <%= f.fields_for :questions do |q| %>
+      <div class="clone_div">
+        <div class="field">
+          <%= q.text_field :question_no, name: "template[questions][1][question_no]" %>
+          <%= q.text_field :question, name: "template[questions][1][question_name]" %>
+          <%= q.text_field :question_type, name: "template[questions][1][question_type]" %>
+        </div>
+      </div>
+      <%= link_to 'Add More', '#', class: 'clone_more' %>
+    <% end %>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<script>
+var fieldHTML = '';
+$(document).ready(function(){
+  fieldHTML = $('.clone_div').html();
+})
+$('.clone_more').click(function(){
+    if ($('.selected_criteriums select').length < 5){
+      originl_view = fieldHTML;
+      index = $('.clone_div .field').size()
+      fieldHTML = fieldHTML.replace('name="template[questions][1][question_no]"', 'name="template[questions][' + (index+1) + '][question_no]"');
+      fieldHTML = fieldHTML.replace('name="template[questions][1][question_name]"', 'name="template[questions][' + (index+1) + '][question_name]"');
+      fieldHTML = fieldHTML.replace('name="template[questions][1][question_type]"', 'name="template[questions][' + (index+1) + '][question_type]"');
+      $('.clone_div').append(fieldHTML);
+      fieldHTML = originl_view;
+    }
+    else{
+      window.scrollTo(0,300);
+      $('.clone_div').parent().find('.errors-full-messages').remove()
+      if ($('.clone_div').parent().find('.errors-full-messages').length < 1) {
+        $('.clone_div').parent().prepend('<div class="errors-full-messages"> A maximum of 5 criterion can be added.</div>')
+      }
+    }
+  });
+</script>
